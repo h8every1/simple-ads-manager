@@ -80,6 +80,7 @@ if ( ! class_exists( 'SamAd' ) ) {
                   sa.ad_swf_flashvars,
                   sa.ad_swf_params,
                   sa.ad_swf_attributes,
+                  sa.ad_swf_fallback,
                   sa.count_clicks,
                   sa.code_type,
                   sp.code_before,
@@ -109,39 +110,50 @@ if ( ! class_exists( 'SamAd' ) ) {
 					$target = '_blank';
 				}
 				if ( ! empty( $ad['ad_target'] ) ) {
+					//$aStart = ((in_array((integer)$ad['ad_no'], array(2,3))) ? '<noindex>' : '')."<a href='{$ad['ad_target']}' target='_blank' ".((in_array((integer)$ad['ad_no'], array(1,3))) ? " rel='nofollow'" : '').">";
+					//$aEnd = "</a>".(in_array((integer)$ad['ad_no'], array(2,3))) ? '</noindex>' : '';
 					$aStart = "<a $outId href='{$ad['ad_target']}' target='$target' " . ">";
 					$aEnd   = "</a>";
 				}
-
 				if ( (int) $ad['ad_swf'] ) {
-					$id         = "ad-" . $ad['id'] . '-' . $rId;
-					$file       = $ad['ad_img'];
-					$sizes      = self::getSize( $ad['place_size'], $ad['place_custom_width'], $ad['place_custom_height'] );
-					$width      = $sizes['width'];
-					$height     = $sizes['height'];
-					$flashvars  = ( ! empty( $ad['ad_swf_flashvars'] ) ) ? $ad['ad_swf_flashvars'] : '{}';
-					$params     = ( ! empty( $ad['ad_swf_params'] ) ) ? $ad['ad_swf_params'] : '{}';
-					$attributes = ( ! empty( $ad['ad_swf_attributes'] ) ) ? $ad['ad_swf_attributes'] : '{}';
-					$text       = __( 'Flash ad' ) . ' ID:' . $ad['id'];
-					$output     = "
-          <script type='text/javascript'>
-          var
-            flashvars = $flashvars,
-            params = $params,
-            attributes = $attributes;
-          attributes.id = '$id';
-          attributes.styleclass = 'sam_ad';
-          swfobject.embedSWF('$file', '$id', '$width', '$height', '9.0.0', '', flashvars, params, attributes);
-          </script>
-          <div class='sam-swf-container'>
-          <noindex><div class=\"sam-flash-overlay\" style=\"position:absolute; z-index:100;\">$aStart<img src=\""
-					              . plugin_dir_url( __FILE__ ) . "images/blank.gif\" width=\"$width\" height=\"$height\" alt=\"\" />$aEnd</div></noindex>
-          <div id='$id'>
-          $text</div>
-          </div>
-          ";
-				} else {
+					$id          = "ad-" . $ad['id'] . '-' . $rId;
+					$file        = $ad['ad_img'];
+					$sizes       = self::getSize( $ad['place_size'], $ad['place_custom_width'], $ad['place_custom_height'] );
+					$width       = $sizes['width'];
+					$height      = $sizes['height'];
+					$flashvars   = ( ! empty( $ad['ad_swf_flashvars'] ) ) ? $ad['ad_swf_flashvars'] : '{}';
+					$params      = ( ! empty( $ad['ad_swf_params'] ) ) ? $ad['ad_swf_params'] : '{}';
+					$attributes  = ( ! empty( $ad['ad_swf_attributes'] ) ) ? $ad['ad_swf_attributes'] : '{}';
+					$text        = ( isset( $ad['ad_swf_fallback'] ) ) ? $ad['ad_swf_fallback']
+						: __( 'Flash ad' ) . ' ID:' . $ad['id'];
+					$blank_image = plugin_dir_url( __FILE__ ) . "images/blank.gif";
 
+					$output = <<<HTML
+<script type="text/javascript">
+	var flashvars = $flashvars, params = $params, attributes = $attributes;
+	attributes.id = "$id";
+	attributes.styleclass = "sam_ad";
+	swfobject.embedSWF("$file", "$id", "$width", "$height", "9.0.0", "",
+	                   flashvars, params, attributes);
+</script>
+HTML;
+
+					$banner_html = "<div id=\"$id\">$text</div>";
+
+					if ( $aStart ) {
+						$banner_html = <<<HTML
+<div class="sam-swf-container" style="position: relative;">
+	<div class="sam-flash-overlay" style="position:absolute; z-index:100;">
+		$aStart
+		<img src="$blank_image" width="$width" height="$height" alt="" style="max-width:100%;" />
+		$aEnd
+	</div>
+	$banner_html
+</div>
+HTML;
+						$output .= $banner_html;
+					}
+				} else {
 					if ( ! empty( $ad['ad_img'] ) ) {
 						$iTag =
 							"<img src='{$ad['ad_img']}' " . ( ( ! empty( $ad['ad_alt'] ) ) ? " alt='{$ad['ad_alt']}' "
@@ -345,6 +357,7 @@ if ( ! class_exists( 'SamAdPlace' ) ) {
   \"\" AS ad_swf_flashvars,
   \"\" AS ad_swf_params,
   \"\" AS ad_swf_attributes,
+  \"\" AS ad_swf_fallback,
   sp.patch_adserver AS ad_adserver,
   sp.patch_dfp AS ad_dfp,
   0 AS count_clicks,
@@ -371,6 +384,7 @@ UNION
   sa.ad_swf_flashvars,
   sa.ad_swf_params,
   sa.ad_swf_attributes,
+  sa.ad_swf_fallback,
   0 AS ad_adserver,
   0 AS ad_dfp,
   sa.count_clicks,
@@ -404,19 +418,33 @@ LIMIT 1;";
 
 			// DFP
 			if ( $ad['code_mode'] == 2 ) {
-				if ( ( $settings['useDFP'] == 1 ) && ! empty( $settings['dfpPub'] ) ) {
-					$output = "<!-- {$ad['ad_dfp']} -->" . "\n";
-					$output .= "<script type='text/javascript'>" . "\n";
-					$output .= "  GA_googleFillSlot('{$ad['ad_dfp']}');" . "\n";
-					$output .= "</script>" . "\n";
-					if ( $useCodes ) {
-						$output = ( is_array( $useCodes ) ) ? $useCodes['before'] . $output . $useCodes['after']
-							: $ad['code_before'] . $output . $ad['code_after'];
-					}
+				if ( $settings['dfpMode'] == 'gam' ) {
+					if ( ( $settings['useDFP'] == 1 ) && ! empty( $settings['dfpPub'] ) ) {
+						$output = "<!-- {$ad['ad_dfp']} -->" . "\n";
+						$output .= "<script type='text/javascript'>" . "\n";
+						$output .= "  GA_googleFillSlot('{$ad['ad_dfp']}');" . "\n";
+						$output .= "</script>" . "\n";
+						if ( $useCodes ) {
+							$output = ( is_array( $useCodes ) ) ? $useCodes['before'] . $output . $useCodes['after']
+								: $ad['code_before'] . $output . $ad['code_after'];
+						}
 
-					$output = "<div id='c{$rId}_{$ad['aid']}_{$ad['pid']}' class='{$container} {$samAd}'>{$output}</div>";
-				} else {
-					$output = '';
+						$output = "<div id='c{$rId}_{$ad['aid']}_{$ad['pid']}' class='{$container} {$samAd}'>{$output}</div>";
+					} else {
+						$output = '';
+					}
+				} elseif ( $settings['dfpMode'] == 'gpt' ) {
+					if ( $settings['useDFP'] == 1 && ! empty( $settings['dfpNetworkCode'] ) ) {
+						include_once( 'sam.functions.php' );
+						$key    = array_search( $ad['ad_dfp'], array_column( $settings['dfpBlocks2'], 'name' ) );
+						$block  = $settings['dfpBlocks2'][ $key ];
+						$output = "<!-- /{$settings['dfpNetworkCode']}/{$block['name']} -->
+<div id='{$block['div']}' style='height:{$block['size'][1]}px; width:{$block['size'][0]}px;'>
+<script type='text/javascript'>
+googletag.cmd.push(function() { googletag.display('{$block['div']}'); });
+</script>
+</div>";
+					}
 				}
 
 				return $output;
@@ -441,11 +469,17 @@ LIMIT 1;";
 
 			// Image and Code Modes
 			if ( $ad['code_mode'] == 0 ) {
-				$outId  = ( (int) $ad['count_clicks'] == 1 ) ?
+				// generate link tag
+				$outId   = ( (int) $ad['count_clicks'] == 1 ) ?
 					" id='a" . rand( 10, 99 ) . "_" . $ad['aid'] . "' class='sam_ad'" : '';
-				$aStart = '';
-				$aEnd   = '';
-				$iTag   = '';
+				$aStart  = '';
+				$aEnd    = '';
+				$iTag    = '';
+				$robo    = (integer) $ad['ad_no'];
+				$rel     = ( ( in_array( $robo, array( 1, 2, 4 ) ) ) ? ( ( in_array( $robo, array( 1, 4 ) ) )
+					? " rel='nofollow'" : " rel='dofollow'" ) : '' );
+				$niStart = ( ( in_array( $robo, array( 3, 4 ) ) ) ? '<noindex>' : '' );
+				$niEnd   = ( ( in_array( $robo, array( 3, 4 ) ) ) ? '</noindex>' : '' );
 				if ( ! empty( $settings['adDisplay'] ) ) {
 					$target = '_' . $settings['adDisplay'];
 				} else {
@@ -454,79 +488,86 @@ LIMIT 1;";
 				if ( ! empty( $ad['ad_target'] ) ) {
 					//$aStart = ((in_array((integer)$ad['ad_no'], array(2,3))) ? '<noindex>' : '')."<a href='{$ad['ad_target']}' target='$target' ".((in_array((integer)$ad['ad_no'], array(1,3))) ? " rel='nofollow'" : '').">";
 					//$aEnd = "</a>".(in_array((integer)$ad['ad_no'], array(2,3))) ? '</noindex>' : '';
-					$aStart = "<a $outId href='{$ad['ad_target']}' target='$target' " . ">";
-					$aEnd   = "</a>";
+					$aStart = "{$niStart}<a $outId href='{$ad['ad_target']}' target='{$target}'{$rel}>";
+					$aEnd   = "</a>{$niEnd}";
 				}
+
 				if ( (int) $ad['ad_swf'] ) {
-					$id         = "ad-" . $ad['aid'] . '-' . $rId;
-					$file       = $ad['ad_img'];
-					$sizes      = self::getSize( $ad['ad_size'], null, null );
-					$width      = $sizes['width'];
-					$height     = $sizes['height'];
-					$flashvars  = ( ! empty( $ad['ad_swf_flashvars'] ) ) ? $ad['ad_swf_flashvars'] : '{}';
-					$params     = ( ! empty( $ad['ad_swf_params'] ) ) ? $ad['ad_swf_params'] : '{}';
-					$attributes = ( ! empty( $ad['ad_swf_attributes'] ) ) ? $ad['ad_swf_attributes'] : '{}';
-					$text       = 'Flash ad ID:' . $ad['aid']; //__('Flash ad').' ID:'.$ad['aid'];
-					$output     = "
-            <script type='text/javascript'>
-            var
-              flashvars = $flashvars,
-              params = $params,
-              attributes = $attributes;
-            attributes.id = '$id';
-            attributes.styleclass = 'sam_ad';
-            swfobject.embedSWF('$file', '$id', '$width', '$height', '9.0.0', '', flashvars, params, attributes);
-            </script>
-          <div class='sam-swf-container'>
-          <noindex>
-          <div class=\"sam-flash-overlay\" style=\"position:absolute; z-index:100;\">$aStart<img src=\""
-					              . plugin_dir_url( __FILE__ ) . "images/blank.gif\" width=\"$width\" height=\"$height\" alt=\"\" />$aEnd
-					              </div></noindex>
-          <div id='$id'>
-          $text</div>
-          </div>
-            ";
-				} else {
+					$id          = "ad-" . $ad['aid'] . '-' . $rId;
+					$file        = $ad['ad_img'];
+					$sizes       = self::getSize( $ad['ad_size'], null, null );
+					$width       = $sizes['width'];
+					$height      = $sizes['height'];
+					$flashvars   = ( ! empty( $ad['ad_swf_flashvars'] ) ) ? $ad['ad_swf_flashvars'] : '{}';
+					$params      = ( ! empty( $ad['ad_swf_params'] ) ) ? $ad['ad_swf_params'] : '{}';
+					$attributes  = ( ! empty( $ad['ad_swf_attributes'] ) ) ? $ad['ad_swf_attributes'] : '{}';
+					$text        = ( isset( $ad['ad_swf_fallback'] ) ) ? $ad['ad_swf_fallback']
+						: "Flash ad ID: {$ad['aid']}"; //__('Flash ad').' ID:'.$ad['aid'];
+					$blank_image = plugin_dir_url( __FILE__ ) . "images/blank.gif";
 
-					if ( ! empty( $ad['ad_img'] ) ) {
-						$iTag =
-							"<img src='{$ad['ad_img']}' " . ( ( ! empty( $ad['ad_alt'] ) ) ? " alt='{$ad['ad_alt']}' "
-								: " alt='' " ) . " />";
+					$output = <<<HTML
+<script type="text/javascript">
+	var flashvars = $flashvars, params = $params, attributes = $attributes;
+	attributes.id = "$id";
+	attributes.styleclass = "sam_ad";
+	swfobject.embedSWF("$file", "$id", "$width", "$height", "9.0.0", "",
+	                   flashvars, params, attributes);
+</script>
+HTML;
+
+					$banner_html = "<div id=\"$id\">$text</div>";
+
+					if ( $aStart ) {
+						$banner_html = <<<HTML
+<div class="sam-swf-container" style="position: relative;">
+	<div class="sam-flash-overlay" style="position:absolute; z-index:100;">
+		$aStart
+		<img src="$blank_image" width="$width" height="$height" alt="" style="max-width:100%;" />
+		$aEnd
+	</div>
+	$banner_html
+</div>
+HTML;
+						$output .= $banner_html;
+					} else {
+						if ( ! empty( $ad['ad_img'] ) ) {
+							$iTag = "<img src='{$ad['ad_img']}' " . ( ( ! empty( $ad['ad_alt'] ) )
+									? " alt='{$ad['ad_alt']}' " : " alt='' " ) . " />";
+						}
+						$output = $aStart . $iTag . $aEnd;
 					}
-					$output = $aStart . $iTag . $aEnd;
+				} elseif ( $ad['code_mode'] == 1 ) {
+					if ( $ad['code_type'] == 1 ) {
+						ob_start();
+						eval( '?>' . $ad['ad_code'] . '<?' );
+						$output = ob_get_contents();
+						ob_end_clean();
+					} else {
+						$output = self::prepareCodes( $ad['ad_code'], $rId );
+					}
 				}
-			} elseif ( $ad['code_mode'] == 1 ) {
-				if ( $ad['code_type'] == 1 ) {
-					ob_start();
-					eval( '?>' . $ad['ad_code'] . '<?' );
-					$output = ob_get_contents();
-					ob_end_clean();
-				} else {
-					$output = self::prepareCodes( $ad['ad_code'], $rId );
+
+				//$this->sql = $output;
+
+				$output = "<div id='c{$rId}_{$ad['aid']}_{$ad['pid']}' class='{$container} {$samPlace}' data-sam='{$data}'>{$output}</div>";
+
+				if ( is_array( $useCodes ) ) {
+					$output = $useCodes['before'] . $output . $useCodes['after'];
+				} elseif ( $useCodes ) {
+					$output = $ad['code_before'] . $output . $ad['code_after'];
 				}
+
+				// Updating Display Cycle
+				if ( ! $this->crawler && ! is_admin() ) {
+					$sSql = "UPDATE $aTable sa SET sa.ad_weight_hits = sa.ad_weight_hits + 1 WHERE sa.id = %d;";
+					$wpdb->query( $wpdb->prepare( $sSql, $ad['aid'] ) );
+				}
+
+				return $output;
 			}
-
-			//$this->sql = $output;
-
-			$output = "<div id='c{$rId}_{$ad['aid']}_{$ad['pid']}' class='{$container} {$samPlace}' data-sam='{$data}'>{$output}</div>";
-
-			if ( is_array( $useCodes ) ) {
-				$output = $useCodes['before'] . $output . $useCodes['after'];
-			} elseif ( $useCodes ) {
-				$output = $ad['code_before'] . $output . $ad['code_after'];
-			}
-
-			// Updating Display Cycle
-			if ( ! $this->crawler && ! is_admin() ) {
-				$sSql = "UPDATE $aTable sa SET sa.ad_weight_hits = sa.ad_weight_hits + 1 WHERE sa.id = %d;";
-				$wpdb->query( $wpdb->prepare( $sSql, $ad['aid'] ) );
-			}
-
-			return $output;
 		}
 	}
 }
-
 if ( ! class_exists( 'SamAdPlaceZone' ) ) {
 	class SamAdPlaceZone {
 		private $args = array();
