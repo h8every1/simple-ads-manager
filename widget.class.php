@@ -122,7 +122,7 @@ if(!class_exists('simple_ads_manager_widget') && class_exists('WP_Widget')) {
         <input
           id="<?php echo $this->get_field_id('hide_style'); ?>"
           name="<?php echo $this->get_field_name('hide_style'); ?>"
-          type="checkbox" <?php checked($instance['hide_style']); ?> />&nbsp;
+          type="checkbox" <?php if (isset($instance['hide_style'])) {checked($instance['hide_style']);} ?> />&nbsp;
         <label for="<?php echo $this->get_field_id('hide_style'); ?>">
           <?php _e('Hide widget style.', SAM_DOMAIN); ?>
         </label>
@@ -131,7 +131,7 @@ if(!class_exists('simple_ads_manager_widget') && class_exists('WP_Widget')) {
         <input
           id="<?php echo $this->get_field_id('place_codes'); ?>"
           name="<?php echo $this->get_field_name('place_codes'); ?>"
-          type="checkbox" <?php checked($instance['place_codes']); ?> />&nbsp;
+          type="checkbox" <?php if (isset($instance['place_code'])) {checked($instance['place_codes']);} ?> />&nbsp;
         <label for="<?php echo $this->get_field_id('place_codes'); ?>">
           <?php _e('Allow using previously defined "before" and "after" codes of Ads Place..', SAM_DOMAIN); ?>
         </label>
@@ -261,7 +261,7 @@ if(!class_exists('simple_ads_manager_zone_widget') && class_exists('WP_Widget'))
         <input 
           id="<?php echo $this->get_field_id('hide_style'); ?>" 
           name="<?php echo $this->get_field_name('hide_style'); ?>" 
-          type="checkbox" <?php checked($instance['hide_style']); ?> />&nbsp;
+          type="checkbox" <?php if (isset($instance['hide_style'])) { checked($instance['hide_style']); } ?> />&nbsp;
         <label for="<?php echo $this->get_field_id('hide_style'); ?>">
           <?php _e('Hide widget style.', SAM_DOMAIN); ?>
         </label>
@@ -270,7 +270,7 @@ if(!class_exists('simple_ads_manager_zone_widget') && class_exists('WP_Widget'))
         <input 
           id="<?php echo $this->get_field_id('place_codes'); ?>" 
           name="<?php echo $this->get_field_name('place_codes'); ?>" 
-          type="checkbox" <?php checked($instance['place_codes']); ?> />&nbsp;
+          type="checkbox" <?php if (isset($instance['place_codes'])) { checked($instance['place_codes']); } ?> />&nbsp;
         <label for="<?php echo $this->get_field_id('place_codes'); ?>">
           <?php _e('Allow using previously defined "before" and "after" codes of Ads Place..', SAM_DOMAIN); ?>
         </label>
@@ -401,7 +401,7 @@ if(!class_exists('simple_ads_manager_ad_widget') && class_exists('WP_Widget')) {
         <input 
           id="<?php echo $this->get_field_id('hide_style'); ?>" 
           name="<?php echo $this->get_field_name('hide_style'); ?>" 
-          type="checkbox" <?php checked($instance['hide_style']); ?> />&nbsp;
+          type="checkbox" <?php if (isset($instance['hide_style'])) { checked($instance['hide_style']);} ?> />&nbsp;
         <label for="<?php echo $this->get_field_id('hide_style'); ?>">
           <?php _e('Hide widget style.', SAM_DOMAIN); ?>
         </label>
@@ -410,7 +410,7 @@ if(!class_exists('simple_ads_manager_ad_widget') && class_exists('WP_Widget')) {
         <input 
           id="<?php echo $this->get_field_id('ad_codes'); ?>" 
           name="<?php echo $this->get_field_name('ad_codes'); ?>" 
-          type="checkbox" <?php checked($instance['ad_codes']); ?> />&nbsp;
+          type="checkbox" <?php if (isset($instance['ad_codes'])) { checked($instance['ad_codes']); } ?> />&nbsp;
         <label for="<?php echo $this->get_field_id('ad_codes'); ?>">
           <?php _e('Allow using previously defined "before" and "after" codes of Ads Place..', SAM_DOMAIN); ?>
         </label>
@@ -539,7 +539,7 @@ if(!class_exists('simple_ads_manager_block_widget') && class_exists('WP_Widget')
         <input 
           id="<?php echo $this->get_field_id('hide_style'); ?>" 
           name="<?php echo $this->get_field_name('hide_style'); ?>" 
-          type="checkbox" <?php checked($instance['hide_style']); ?> />&nbsp;
+          type="checkbox" <?php if (isset($instance['hide_style'])) { checked($instance['hide_style']); } ?> />&nbsp;
         <label for="<?php echo $this->get_field_id('hide_style'); ?>">
           <?php _e('Hide widget style.', SAM_DOMAIN); ?>
         </label>
