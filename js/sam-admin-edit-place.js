@@ -224,6 +224,7 @@ var sam = sam || {};
         plotData = [data.hits, data.clicks];
         $('#total_hits').text(data.total.hits);
         $('#total_clicks').text(data.total.clicks);
+        $('#total_ctr').text(data.total.ctr);
         plot = $.jqplot('graph', plotData, plotOptions);
       });
 
@@ -316,6 +317,7 @@ var sam = sam || {};
           plotData = [data.hits, data.clicks];
           $('#total_hits').text(data.total.hits);
           $('#total_clicks').text(data.total.clicks);
+          $('#total_ctr').text(data.total.ctr);
           if(plot) {
             plot.destroy();
             plot = $.jqplot('graph', plotData, plotOptions);

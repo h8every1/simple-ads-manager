@@ -609,6 +609,7 @@ if(!class_exists('SamPlaceEdit')) {
                 <strong><?php echo __('Total', SAM_DOMAIN) . ':'; ?></strong><br>
                 <?php _e('Hits', SAM_DOMAIN); ?>: <span id="total_hits"></span><br>
                 <?php _e('Clicks', SAM_DOMAIN); ?>: <span id="total_clicks"></span><br>
+                <?php _e('CTR', SAM_DOMAIN); ?>: <span id="total_ctr"></span><br>
               </p>
               <?php } ?>
             </div>
@@ -1560,6 +1561,7 @@ if(!class_exists('SamPlaceEdit')) {
                   <strong><?php echo __('Total', SAM_DOMAIN) . ':'; ?></strong><br>
                   <?php _e('Hits', SAM_DOMAIN); ?>: <span id="total_hits"></span><br>
                   <?php _e('Clicks', SAM_DOMAIN); ?>: <span id="total_clicks"></span><br>
+                  <?php _e('CTR', SAM_DOMAIN); ?>: <span id="total_ctr"></span><br>
                 </p>
                 <?php } ?>
               </div>
