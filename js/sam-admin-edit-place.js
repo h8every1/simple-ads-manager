@@ -91,30 +91,28 @@ var sam = sam || {};
 
     var options = samEditorOptions.options, plot, plotData = [],
       plotOptions = {
-        animate: true,
+        animate: false,
         // Will animate plot on calls to plot1.replot({resetAxes:true})
         animateReplot: true,
         cursor: {
-          //show: true,
-          //zoom: true,
-          //looseZoom: true,
           showTooltip: false
+        },
+        seriesDefaults: {
+          pointLabels: {
+            show: true,
+            xpadding: 12,
+            ypadding: -5,
+            hideZeros: true
+          }
         },
         series:[
           {
             pointLabels: {
-              show: true
+              location: 'ne'
             },
             renderer: $.jqplot.BarRenderer,
             showHighlight: false,
-            //yaxis: 'y2axis',
             rendererOptions: {
-              // Speed up the animation a little bit.
-              // This is a number of milliseconds.
-              // Default for bar series is 3000.
-              animation: {
-                speed: 2500
-              },
               barWidth: 15,
               barPadding: -15,
               barMargin: 0,
@@ -124,18 +122,19 @@ var sam = sam || {};
           },
           {
             label: labels.clicks,
-            rendererOptions: {
-              // speed up the animation a little bit.
-              // This is a number of milliseconds.
-              // Default for a line series is 2500.
-              animation: {
-                speed: 2000
-              }
+            yaxis: 'y2axis',
+            pointLabels: {
+              location: 'nw'
             }
+
           }
         ],
         axesDefaults: {
-          pad: 0
+          pad: 1.2,
+          min: 0,
+          tickOptions: {
+            formatString: '%d'
+          }
         },
         axes: {
           // These options will set up the x axis like a category axis.
@@ -148,26 +147,14 @@ var sam = sam || {};
               tickInset: 1, //0.5,
               minorTicks: 1
             },
-            //padMin: 0,
+            pad: 1,
             min: 1
           },
-          yaxis: {
-            /*tickOptions: {
-             formatString: "%'d"
-             },*/
+          y2axis: {
             rendererOptions: {
-              forceTickAt0: true
+              alignTicks: true
             }
           }
-        },
-        highlighter: {
-          show: true,
-          showLabel: true,
-          tooltipAxes: 'y',
-          sizeAdjust: 7.5 ,
-          tooltipLocation : 'ne',
-          useAxesFormatters: false,
-          tooltipFormatString: labels.clicks + ': %d'
         },
         legend: {
           show: true,

@@ -120,67 +120,70 @@ var sam = sam || {};
     var stats, itemId = $('#item_id').val(), sMonth = 0;
     var plot, plotData = [],
       plotOptions = {
-        animate: true,
+        animate: false,
+        // Will animate plot on calls to plot1.replot({resetAxes:true})
         animateReplot: true,
         cursor: {
           showTooltip: false
         },
+        seriesDefaults: {
+          pointLabels: {
+            show: true,
+            xpadding: 12,
+            ypadding: -5,
+            hideZeros: true
+          }
+        },
         series:[
           {
             pointLabels: {
-              show: true
+              location: 'ne'
             },
             renderer: $.jqplot.BarRenderer,
             showHighlight: false,
             rendererOptions: {
-              animation: {
-                speed: 2500
-              },
               barWidth: 15,
               barPadding: -15,
               barMargin: 0,
               highlightMouseOver: false
             },
-            label: samStrs.labels.hits
+            label: labels.hits
           },
           {
-            label: samStrs.labels.clicks,
-            rendererOptions: {
-              animation: {
-                speed: 2000
-              }
+            label: labels.clicks,
+            yaxis: 'y2axis',
+            pointLabels: {
+              location: 'nw'
             }
+
           }
         ],
         axesDefaults: {
-          pad: 0
+          pad: 1.2,
+          min: 0,
+          tickOptions: {
+            formatString: '%d'
+          }
         },
         axes: {
+          // These options will set up the x axis like a category axis.
           xaxis: {
             tickInterval: 1,
             drawMajorGridlines: false,
             drawMinorGridlines: true,
             drawMajorTickMarks: false,
             rendererOptions: {
-              tickInset: 1,
+              tickInset: 1, //0.5,
               minorTicks: 1
             },
+            pad: 1,
             min: 1
           },
-          yaxis: {
+          y2axis: {
             rendererOptions: {
-              forceTickAt0: true
+              alignTicks: true
             }
           }
-        },
-        highlighter: {
-          show: true,
-          showLabel: true,
-          tooltipAxes: 'y',
-          sizeAdjust: 7.5 ,
-          tooltipLocation : 'ne',
-          useAxesFormatters: false,
-          tooltipFormatString: samStrs.labels.clicks + ': %d'
         },
         legend: {
           show: true,
