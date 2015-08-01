@@ -100,8 +100,8 @@ var sam = sam || {};
         seriesDefaults: {
           pointLabels: {
             show: true,
-            xpadding: 12,
-            ypadding: -5,
+            xpadding: 10,
+            ypadding: 0,
             hideZeros: true,
             formatString: "%d"
           }
