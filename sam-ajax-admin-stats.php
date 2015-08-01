@@ -88,6 +88,7 @@ if(in_array($action, $allowed_actions)) {
         for($i = 1; $i <= $days; $i++) {
           $hitsFull[$i - 1] = array( $i, 0);
           $clicksFull[$i - 1] = array($i, 0);
+          $ctrFull[$i - 1] = array($i, 0);
         }
         foreach($hits as $hit) $hitsFull[$hit['ed'] - 1][1] = (integer) $hit['hits'];
         foreach($clicks as $click) $clicksFull[$click['ed'] - 1][1] = (integer) $click['hits'];
@@ -102,8 +103,10 @@ if(in_array($action, $allowed_actions)) {
                     COUNT(*)
                     FROM $sTable ss
                     WHERE (EXTRACT(YEAR_MONTH FROM %s) = EXTRACT(YEAR_MONTH FROM ss.event_time))
-                      AND ss.event_type = 1 AND ss.pid = %d) AS clicks;";
+                      AND ss.event_type = 1 AND ss.pid = %d) AS clicks,
+                      0 AS 'ctr';";
         $total = $wpdb->get_row($wpdb->prepare($sql, $month, $pid, $month, $pid));
+          $total->ctr = round( ( 100 * $total->clicks / $total->hits ), 5 ) . '%';
 
         $out = array('hits' => $hitsFull, 'clicks' => $clicksFull, 'total' => $total);
       }
@@ -146,8 +149,10 @@ if(in_array($action, $allowed_actions)) {
                     COUNT(*)
                     FROM $sTable ss
                     WHERE (EXTRACT(YEAR_MONTH FROM %s) = EXTRACT(YEAR_MONTH FROM ss.event_time))
-                      AND ss.event_type = 1 AND ss.id = %d) AS clicks;";
+                      AND ss.event_type = 1 AND ss.id = %d) AS clicks,
+                      0 AS 'ctr';";
         $total = $wpdb->get_row($wpdb->prepare($sql, $month, $id, $month, $id));
+          $total->ctr = round( ( 100 * $total->clicks / $total->hits ), 5 ) . '%';
 
         $out = array('hits' => $hitsFull, 'clicks' => $clicksFull, 'total' => $total);
       }

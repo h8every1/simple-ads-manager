@@ -311,6 +311,7 @@ var sam = sam || {};
       if(iAction != 'new') {
         $('#total_hits').text(data.total.hits);
         $('#total_clicks').text(data.total.clicks);
+        $('#total_ctr').text(data.total.ctr);
         plotData = [data.hits, data.clicks];
         plot = $.jqplot('graph', plotData, plotOptions);
       }
@@ -829,6 +830,7 @@ var sam = sam || {};
       }).done(function(data) {
           $('#total_hits').text(data.total.hits);
           $('#total_clicks').text(data.total.clicks);
+          $('#total_ctr').text(data.total.ctr);
           plotData = [data.hits, data.clicks];
           if(plot && iAction != 'new') {
             plot.destroy();
