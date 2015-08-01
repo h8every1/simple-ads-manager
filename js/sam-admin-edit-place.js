@@ -102,7 +102,8 @@ var sam = sam || {};
             show: true,
             xpadding: 12,
             ypadding: -5,
-            hideZeros: true
+            hideZeros: true,
+            formatString: "%d"
           }
         },
         series:[
@@ -131,10 +132,7 @@ var sam = sam || {};
         ],
         axesDefaults: {
           pad: 1.2,
-          min: 0,
-          tickOptions: {
-            formatString: '%d'
-          }
+          min: 0
         },
         axes: {
           // These options will set up the x axis like a category axis.
