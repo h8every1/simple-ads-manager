@@ -233,6 +233,14 @@ input.button-primary, input.button-secondary,
   -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
+.jqplot-series-0 {
+  color: #092142;
+}
+
+.jqplot-series-1 {
+  color: #42331c;
+}
+
 /*.itab {
   width: 100%;
   height: 400px;
