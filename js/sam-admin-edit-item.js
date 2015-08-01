@@ -147,10 +147,10 @@ var sam = sam || {};
               barMargin: 0,
               highlightMouseOver: false
             },
-            label: labels.hits
+            label: samStrs.labels.hits
           },
           {
-            label: labels.clicks,
+            label: samStrs.labels.clicks,
             yaxis: 'y2axis',
             pointLabels: {
               location: 'nw'
