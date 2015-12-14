@@ -36,7 +36,7 @@ if ( !class_exists( 'SimpleAdsManagerAdmin' && class_exists('SimpleAdsManager') 
       if(!empty($options['access'])) $access = $options['access'];
       else $access = 'manage_options';
 
-      define('SAM_ACCESS', $access);
+      define('SAM_ACCESS', 'manage_ads');
 
       add_action('wp_ajax_close_sam_pointer', array(&$this, 'closePointerHandler'));
 			add_action('admin_menu', array(&$this, 'regAdminPage'));
