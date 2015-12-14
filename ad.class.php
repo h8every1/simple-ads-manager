@@ -560,6 +560,26 @@ HTML;
 
 			return $output;
 		}
+
+		public function hasDefaultAd() {
+			global $wpdb;
+			$pTable = $wpdb->prefix . "sam_places";
+			$pId    = 'sp.id = '.$this->args['id'];
+
+			// SQL was changed. Bad way, incorrect logic, but it reflects when the cycle is exceed border values for some set of restrictions.
+			$aSql = "
+SELECT
+  sp.patch_code AS ad_code,
+  sp.patch_img AS ad_img,
+  sp.patch_link AS ad_target
+FROM {$pTable} sp
+WHERE {$pId} AND sp.trash IS FALSE
+LIMIT 1;";
+
+			$ad = $wpdb->get_row( $aSql, ARRAY_A );
+
+			return ($ad['ad_img'] || $ad['ad_target'] || $ad['ad_code']);
+		}
 	}
 }
 if ( ! class_exists( 'SamAdPlaceZone' ) ) {
